@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FocusLearn — Online Learning Prototype</title>
+<style>
+:root{
+  --cream:#F7F1E8; --paper:#FFFDF8; --sage:#9CAF98; --sage-dark:#5D725D;
+  --terracotta:#C98772; --terracotta-dark:#9B5E4D; --mauve:#B7A1AE;
+  --ink:#2F3932; --muted:#748078; --line:#E3D9CC; --white:#FFFFFF;
+  --shadow:0 12px 35px rgba(65,55,45,.10);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--cream);color:var(--ink)}
+button{font:inherit;cursor:pointer;border:0}
+.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+.sidebar{background:var(--paper);border-right:1px solid var(--line);padding:28px 18px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;margin:4px 10px 34px;font-weight:800;font-size:21px}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,var(--sage),#d8dfcf);display:grid;place-items:center;font-size:20px}
+.nav button{width:100%;text-align:left;background:transparent;padding:13px 14px;border-radius:12px;color:var(--muted);margin:3px 0}
+.nav button.active,.nav button:hover{background:#EAF0E7;color:var(--sage-dark);font-weight:700}
+.focus-card{margin-top:35px;padding:18px;border-radius:18px;background:#F4E2DB;border:1px solid #E8C9BE}
+.focus-card h4{margin:0 0 7px}.focus-card p{font-size:13px;color:var(--muted);line-height:1.5}
+.primary{background:var(--terracotta);color:white;border-radius:11px;padding:11px 16px;font-weight:700}
+.secondary{background:#E8EEE5;color:var(--sage-dark);border-radius:11px;padding:11px 16px;font-weight:700}
+.main{padding:28px 34px 50px;max-width:1300px;width:100%;margin:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.greeting h1{font-size:30px;margin:0 0 6px}.greeting p{margin:0;color:var(--muted)}
+.avatar{width:43px;height:43px;border-radius:50%;background:var(--mauve);display:grid;place-items:center;color:white;font-weight:800}
+.view{display:none}.view.active{display:block}
+.hero{background:linear-gradient(120deg,#E5ECE0,#F5E1D8);border:1px solid var(--line);border-radius:24px;padding:28px;display:flex;justify-content:space-between;gap:25px;box-shadow:var(--shadow)}
+.hero h2{font-size:28px;margin:0 0 10px}.hero p{color:var(--muted);max-width:650px;line-height:1.6}
+.hero-badge{align-self:center;background:rgba(255,255,255,.72);padding:20px;border-radius:18px;text-align:center;min-width:145px}
+.progress{height:9px;background:#E5DED5;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--sage-dark);border-radius:99px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 5px 18px rgba(65,55,45,.05)}
+.stat{display:flex;align-items:center;justify-content:space-between}.stat strong{font-size:27px}.stat small{color:var(--muted)}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:26px 0 13px}.section-title h3{margin:0}
+.lesson-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lesson{transition:.2s}.lesson:hover{transform:translateY(-3px)}
+.tag{display:inline-block;padding:6px 9px;border-radius:99px;font-size:12px;font-weight:700;background:#E8EEE5;color:var(--sage-dark);margin-bottom:12px}
+.lesson h4{margin:4px 0 7px}.lesson p{font-size:13px;color:var(--muted);line-height:1.5}.lesson-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:12px;color:var(--muted)}
+.quiz-box{max-width:760px;margin:auto}.question{font-size:21px;font-weight:750;line-height:1.4;margin:24px 0}
+.options{display:grid;gap:10px}.option{background:white;border:1.5px solid var(--line);padding:15px;border-radius:13px;text-align:left}.option:hover{border-color:var(--sage)}.option.selected{border-color:var(--terracotta);background:#F8E9E3}
+.feedback{margin-top:15px;padding:14px;border-radius:12px;display:none}.feedback.show{display:block}.correct{background:#E8F0E5;color:#4C684C}.wrong{background:#F7E1DA;color:#8B4F41}
+.lesson-content{max-width:850px;margin:auto}.video{height:270px;border-radius:20px;background:linear-gradient(135deg,#DCE6D8,#EED8D0);display:grid;place-items:center;margin:18px 0}.play{width:70px;height:70px;border-radius:50%;background:white;display:grid;place-items:center;font-size:25px;color:var(--terracotta-dark);box-shadow:var(--shadow)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{padding:16px;background:#fff;border:1px solid var(--line);border-radius:14px}.step b{display:block;margin-bottom:5px}.step span{font-size:13px;color:var(--muted)}
+textarea,input{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:white;font:inherit;outline:none}textarea:focus,input:focus{border-color:var(--sage)}
+.discussion{display:grid;gap:12px}.post{display:flex;gap:12px}.mini-avatar{width:36px;height:36px;border-radius:50%;background:var(--mauve);color:white;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}.post p{margin:3px 0;color:var(--muted);font-size:14px;line-height:1.5}
+.chart{height:230px;display:flex;align-items:end;gap:18px;padding:20px 10px 0}.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px}.bar i{width:100%;max-width:55px;background:var(--sage);border-radius:9px 9px 3px 3px;display:block}.bar:nth-child(2) i{background:var(--terracotta)}.bar:nth-child(3) i{background:var(--mauve)}.bar:nth-child(4) i{background:#D3B08F}.bar span{font-size:12px;color:var(--muted);text-align:center}
+.focus-mode{position:fixed;inset:0;background:#28342D;color:#F8F3EB;z-index:20;display:none;place-items:center;text-align:center;padding:30px}.focus-mode.show{display:grid}.focus-inner{max-width:650px}.timer{font-size:80px;font-weight:800;margin:25px 0}.focus-inner p{color:#C8D0C9}.close{position:fixed;right:25px;top:calc(22px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.12);color:white;border-radius:10px;padding:10px 14px}
+.toast{position:fixed;bottom:calc(25px + env(safe-area-inset-bottom,0px));right:25px;background:#2F3932;color:white;padding:14px 18px;border-radius:12px;display:none;box-shadow:var(--shadow)}.toast.show{display:block}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:12px}.brand{margin-bottom:10px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.focus-card{display:none}.main{padding:22px 16px}.lesson-grid,.steps,.stats{grid-template-columns:1fr}.hero{flex-direction:column}.hero-badge{align-self:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">🌿</div> FocusLearn</div>
+  <nav class="nav">
+    <button class="active" data-view="home">⌂ &nbsp; Dashboard</button>
+    <button data-view="learn">▣ &nbsp; Learn</button>
+    <button data-view="quiz">✓ &nbsp; Quizzes</button>
+    <button data-view="apply">✦ &nbsp; Apply</button>
+    <button data-view="discuss">◌ &nbsp; Discuss</button>
+    <button data-view="progress">◷ &nbsp; Progress</button>
+  </nav>
+  <div class="focus-card">
+    <h4>Need to focus?</h4>
+    <p>Hide distractions and study for 25 minutes with Focus Mode.</p>
+    <button class="primary" onclick="openFocus()">Start focus mode</button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="greeting"><h1 id="pageTitle">Good morning 👋</h1><p id="pageSub">Ready for a focused learning session?</p></div>
+  <div class="avatar">👤</div>
+</header>
+
+<section id="home" class="view active">
+  <div class="hero">
+    <div><span class="tag">TODAY'S PLAN</span><h2>Learn a little. Interact more.</h2><p>Your next 12-minute lesson is ready. Complete the micro-lesson, check your understanding, then apply it with a practical task.</p><button class="primary" onclick="showView('learn')">Continue learning →</button></div>
+    <div class="hero-badge"><div style="font-size:34px">🌱</div><strong>70%</strong><div style="font-size:12px;color:var(--muted)">weekly goal</div></div>
+  </div>
+  <div class="stats">
+    <div class="card stat"><div><small>Study streak</small><br><strong>5 days</strong></div><span>🔥</span></div>
+    <div class="card stat"><div><small>Lessons completed</small><br><strong>12</strong></div><span>✓</span></div>
+    <div class="card stat"><div><small>Quiz average</small><br><strong>86%</strong></div><span>★</span></div>
+  </div>
+  <div class="section-title"><h3>Continue your learning</h3><button class="secondary" onclick="showView('learn')">View all</button></div>
+  <div class="lesson-grid">
+    <div class="card lesson"><span class="tag">12 MIN</span><h4>How Memory Works</h4><p>Learn three simple ways to remember information for longer.</p><div class="progress"><span style="width:55%"></span></div><div class="lesson-footer"><span>55% complete</span><button class="secondary" onclick="openLesson()">Resume</button></div></div>
+    <div class="card lesson"><span class="tag">8 MIN</span><h4>Study Smarter</h4><p>Turn passive reading into active learning with retrieval practice.</p><div class="progress"><span style="width:20%"></span></div><div class="lesson-footer"><span>20% complete</span><button class="secondary" onclick="openLesson()">Start</button></div></div>
+    <div class="card lesson"><span class="tag">15 MIN</span><h4>Focus & Attention</h4><p>Understand distractions and build a better online study routine.</p><div class="progress"><span style="width:0%"></span></div><div class="lesson-footer"><span>Not started</span><button class="secondary" onclick="openFocus()">Focus</button></div></div>
+  </div>
+</section>
+
+<section id="learn" class="view">
+  <div class="section-title"><h2>Micro-learning</h2><span class="tag">SHORT + FOCUSED</span></div>
+  <div class="lesson-content">
+    <div class="card">
+      <span class="tag">LESSON 01 · 12 MIN</span><h2>How Memory Works</h2>
+      <p style="color:var(--muted);line-height:1.6">Instead of watching a long lecture, learn one useful idea at a time.</p>
+      <div class="video"><div class="play" onclick="toast('Lesson started — 12 minutes of focused learning!')">▶</div></div>
+      <h3>Remember these 3 ideas</h3>
+      <div class="steps"><div class="step"><b>1. Retrieve</b><span>Try to recall before looking at the answer.</span></div><div class="step"><b>2. Connect</b><span>Link new ideas to something you already know.</span></div><div class="step"><b>3. Apply</b><span>Use the idea in a small real-world task.</span></div></div>
+      <div style="margin-top:20px;display:flex;gap:10px"><button class="primary" onclick="showView('quiz')">Check understanding →</button><button class="secondary" onclick="openFocus()">Focus mode</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz" class="view">
+  <div class="quiz-box">
+    <div class="card">
+      <span class="tag">QUICK QUIZ · 1 OF 3</span>
+      <h2>Check your understanding</h2>
+      <div class="question">Which action is most likely to strengthen your memory?</div>
+      <div class="options">
+        <button class="option" onclick="answer(this,false)">A. Re-read the same page several times</button>
+        <button class="option" onclick="answer(this,true)">B. Try to recall the idea without looking</button>
+        <button class="option" onclick="answer(this,false)">C. Watch the lesson again without taking action</button>
+        <button class="option" onclick="answer(this,false)">D. Study everything in one long session</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <div style="margin-top:20px"><button class="primary" onclick="showView('apply')">Next: Apply →</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="apply" class="view">
+  <div class="lesson-content">
+    <div class="card">
+      <span class="tag">APPLY · 5 MIN</span><h2>Make it real</h2>
+      <p style="color:var(--muted);line-height:1.6">Write one example of how you could use retrieval practice while studying your next subject.</p>
+      <textarea id="task" rows="7" placeholder="For example: Before checking my notes, I will write everything I remember about..."></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px"><span id="saved" style="color:var(--sage-dark);font-size:13px"></span><button class="primary" onclick="saveTask()">Save my answer</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="discuss" class="view">
+  <div class="section-title"><h2>Study discussions</h2><span class="tag">LEARN TOGETHER</span></div>
+  <div class="card">
+    <h3>Today's question</h3><p style="color:var(--muted)">What helps you stay focused during an online class?</p>
+    <div style="display:flex;gap:10px;margin:15px 0"><input id="postText" placeholder="Share your experience..."><button class="primary" onclick="addPost()">Post</button></div>
+    <div id="posts" class="discussion">
+      <div class="post"><div class="mini-avatar">M</div><div><b>Maya</b><p>Short quizzes keep me active instead of just listening.</p></div></div>
+      <div class="post"><div class="mini-avatar" style="background:var(--sage)">R</div><div><b>Rohan</b><p>I put my phone away and use a 25-minute focus timer.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="progress" class="view">
+  <div class="section-title"><h2>Your progress</h2><span class="tag">THIS WEEK</span></div>
+  <div class="card">
+    <h3>Learning activity</h3><div class="chart">
+      <div class="bar"><i style="height:45%"></i><span>Mon</span></div><div class="bar"><i style="height:70%"></i><span>Tue</span></div><div class="bar"><i style="height:55%"></i><span>Wed</span></div><div class="bar"><i style="height:88%"></i><span>Thu</span></div><div class="bar"><i style="height:65%"></i><span>Fri</span></div><div class="bar"><i style="height:35%"></i><span>Sat</span></div><div class="bar"><i style="height:20%"></i><span>Sun</span></div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="card"><small>Lessons</small><h2>12 / 16</h2><div class="progress"><span style="width:75%"></span></div></div>
+    <div class="card"><small>Quiz accuracy</small><h2>86%</h2><div class="progress"><span style="width:86%"></span></div></div>
+    <div class="card"><small>Focus time</small><h2>3h 40m</h2><div class="progress"><span style="width:68%"></span></div></div>
+  </div>
+</section>
+</main>
+</div>
+
+<div id="focusMode" class="focus-mode"><button class="close" onclick="closeFocus()">Exit focus mode</button><div class="focus-inner"><div style="font-size:48px">🌿</div><h1>Focus Mode</h1><p>Notifications off. One task at a time. You can do this.</p><div class="timer" id="timer">25:00</div><button class="primary" onclick="toast('Focus session started!')">Start session</button></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const titles={home:['Good morning 👋','Ready for a focused learning session?'],learn:['Learn','Short lessons designed for attention.'],quiz:['Quick quiz','Check what you understood.'],apply:['Apply','Turn learning into action.'],discuss:['Discuss','Learn from other students.'],progress:['Your progress','Small steps add up.']};
+let timerInterval, seconds=1500;
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+function showView(id){
+ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+ document.getElementById('pageTitle').textContent=titles[id][0];
+ document.getElementById('pageSub').textContent=titles[id][1];
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function openLesson(){showView('learn')}
+function answer(el,correct){
+ document.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');
+ const f=document.getElementById('feedback');f.className='feedback show '+(correct?'correct':'wrong');f.textContent=correct?'✓ Correct! Retrieval practice strengthens learning.':'Not quite. Try recalling the idea before looking at the answer.';
+}
+function saveTask(){document.getElementById('saved').textContent='✓ Saved to your learning journal';toast('Your reflection was saved.')}
+function addPost(){
+ const input=document.getElementById('postText');if(!input.value.trim())return;
+ const div=document.createElement('div');div.className='post';div.innerHTML='<div class="mini-avatar">Y</div><div><b>You</b><p></p></div>';div.querySelector('p').textContent=input.value;document.getElementById('posts').prepend(div);input.value='';toast('Your post was added.')}
+function openFocus(){document.getElementById('focusMode').classList.add('show');startTimer()}
+function closeFocus(){document.getElementById('focusMode').classList.remove('show');clearInterval(timerInterval)}
+function startTimer(){clearInterval(timerInterval);seconds=1500;updateTimer();timerInterval=setInterval(()=>{seconds--;updateTimer();if(seconds<=0){clearInterval(timerInterval);toast('Focus session complete! 🎉')}},1000)}
+function updateTimer(){document.getElementById('timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+</script>
+</body>
+</html>
